@@ -13,7 +13,8 @@ private:
     SDL_Window *pWindow;
     SDL_Renderer *pRenderer;
     SDL_Texture *pTexture;
-    Uint32 *pBufferCurrent;
+    Uint32 *pMainBuffer;
+    Uint32 *pSecondaryBuffer;
 public:
     Screen(int screenWidth, int screenHeight);
     ~Screen();
@@ -28,7 +29,8 @@ public:
     Uint32 *getBuffer();
     void setPixelColor(int xValue, int yValue, Uint32 value);
     void setPixelColor(int xValue, int yValue, Uint8 red, Uint8 blue, Uint8 green);
-    void reset();
+    void clear();
+    void boxBlur();
 };
 
 

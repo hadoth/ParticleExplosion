@@ -6,31 +6,35 @@
 Particle::Particle():
         xValue(0),
         yValue(0),
-        rSpeed(0.001 * (1.0 - (1.0 * rand()/RAND_MAX))),
+        rSpeed(0.05 * (1.0 - (1.0 * rand()/RAND_MAX))),
         phi(M_PI * ((2.0 * rand()/RAND_MAX) - 1)),
-        tSpeed(0.006 + (0.004 * rand()/RAND_MAX)) {
+        tSpeed(0.0001 + (0.00001 * rand()/RAND_MAX)) {
+    rSpeed *= rSpeed*rSpeed;
 }
 
 Particle::~Particle() {
 
 }
 
-void Particle::update() {
+void Particle::update(int timeElapsed) {
+    double dPhi = tSpeed * timeElapsed;
+    double dRadius = rSpeed * timeElapsed;
+
     // radial transformation;
-    xValue += rSpeed * cos(phi);
-    yValue += rSpeed * sin(phi);
+    xValue += dRadius * cos(phi);
+    yValue += dRadius * sin(phi);
 
     // tangent transformation
-    double newX = xValue * cos(tSpeed) - yValue * sin(tSpeed);
-    yValue = yValue * cos(tSpeed) + xValue * sin(tSpeed);
+    double newX = xValue * cos(dPhi) - yValue * sin(dPhi);
+    yValue = yValue * cos(dPhi) + xValue * sin(dPhi);
     xValue = newX;
-    phi += tSpeed;
+//    phi += dPhi;
 
-
-//    rSpeed = rSpeed * 0.99999999;
-//    if (rSpeed < 0) {
-//        std::cout << rSpeed << std::endl;
-//    }
-
-//    std::cout << (xValue * xValue + yValue * yValue) << std::endl;
+    if ( xValue < -1 || xValue >=1 || yValue < -1 || yValue >=1) {
+        xValue = 0;
+        yValue = 0;
+        rSpeed = 0.04 * (1.0 - (1.0 * rand()/RAND_MAX));
+        phi = M_PI * ((2.0 * rand()/RAND_MAX) - 1);
+        tSpeed = 0.00006 + (0.00004 * rand()/RAND_MAX);
+    }
 }

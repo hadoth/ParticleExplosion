@@ -7,12 +7,13 @@ class Swarm {
 private:
     const int swarmSize;
     Particle *pParticles;
+    int lastTime;
 public:
     Swarm(int swarmSize);
     virtual ~Swarm();
     const Particle* const getParticles() { return pParticles;}
     int getSwarmSize() { return swarmSize;}
-    void update();
+    void update(int timestamp);
 };
 
 

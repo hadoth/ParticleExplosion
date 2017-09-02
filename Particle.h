@@ -14,7 +14,7 @@ public:
     virtual ~Particle();
     double getX() {return xValue;}
     double getY() {return yValue;}
-    void update();
+    void update(int timeElapsed);
 };
 
 

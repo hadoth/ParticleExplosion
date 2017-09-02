@@ -31,13 +31,13 @@ void Simulation::handleLogic() {
 
     int elapsed = SDL_GetTicks();
     Uint8 red = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0006 + 2*M_PI/3)));
-    Uint8 green = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0005 + M_PI)));
-    Uint8 blue = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0004)));
+    Uint8 green = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0004)));
+    Uint8 blue = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0005 + M_PI)));
 
     const Particle * const pParticles = this->pSwarm->getParticles();
 
-    pScreen->reset();
-    pSwarm->update();
+//    pScreen->clear();
+    pSwarm->update(elapsed);
 
     for (int i = 0; i < this->pSwarm->getSwarmSize(); i++) {
         Particle particle = pParticles[i];
@@ -47,6 +47,7 @@ void Simulation::handleLogic() {
 
         this->pScreen->setPixelColor(x, y, red, green, blue);
     }
+    pScreen->boxBlur();
 }
 
 void Simulation::start() {

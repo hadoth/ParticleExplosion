@@ -77,10 +77,12 @@ int Screen::setup() {
     cout << "SDL texture successfully initialized." << endl;
     cout << "Initializing data buffer..." << endl;
 
-    this->pBufferCurrent = new Uint32[this->getWidth() * this->getHeight()];
-    memset(this->pBufferCurrent, 0x00, this->getWidth() * this->getHeight() * sizeof(Uint32));
+    this->pMainBuffer = new Uint32[this->getWidth() * this->getHeight()];
+    this->pSecondaryBuffer = new Uint32[this->getWidth() * this->getHeight()];
+    memset(this->pMainBuffer, 0x00, this->getWidth() * this->getHeight() * sizeof(Uint32));
+    memset(this->pSecondaryBuffer, 0x00, this->getWidth() * this->getHeight() * sizeof(Uint32));
 
-    cout << "Data buffer successfully initialized." << endl;
+    cout << "Data buffers successfully initialized." << endl;
 
     return result;
 }
@@ -96,7 +98,8 @@ int Screen::close() {
         SDL_DestroyWindow(pWindow);
     }
     if (this ->result < 1) {
-        delete[] this->pBufferCurrent;
+        delete[] this->pMainBuffer;
+        delete[] this->pSecondaryBuffer;
         SDL_Quit();
         cout << "Program initialized and run without errors" << endl;
     }
@@ -118,7 +121,7 @@ void Screen::handleRendering() {
     SDL_UpdateTexture(
             this->pTexture,
             NULL,
-            this->pBufferCurrent,
+            this->pMainBuffer,
             this->getWidth() * sizeof(Uint32)
     );
     SDL_RenderClear(
@@ -149,12 +152,12 @@ int Screen::getResult() {
 
 Uint32 *Screen::getBuffer() {
     Uint32* result = new Uint32[this->screenWidth * this->screenHeight];
-    memcpy(result, this->pBufferCurrent, this->screenWidth * this-> screenHeight * sizeof(Uint32));
+    memcpy(result, this->pMainBuffer, this->screenWidth * this-> screenHeight * sizeof(Uint32));
     return result;
 }
 
 void Screen::setBuffer(Uint32 *pBuffer) {
-    memcpy(this->pBufferCurrent, pBuffer, this->screenWidth * this-> screenHeight * sizeof(Uint32));
+    memcpy(this->pMainBuffer, pBuffer, this->screenWidth * this-> screenHeight * sizeof(Uint32));
 }
 
 void Screen::setPixelColor(int xValue, int yValue, Uint8 red, Uint8 blue, Uint8 green) {
@@ -168,7 +171,7 @@ void Screen::setPixelColor(int xValue, int yValue, Uint8 red, Uint8 blue, Uint8 
     pixelValue += blue;
     pixelValue <<= 8;
     pixelValue += 0xFF;
-    this->pBufferCurrent[pixelIndex] = pixelValue;
+    this->pMainBuffer[pixelIndex] = pixelValue;
 }
 
 void Screen::setPixelColor(int xValue, int yValue, Uint32 value) {
@@ -176,10 +179,56 @@ void Screen::setPixelColor(int xValue, int yValue, Uint32 value) {
         return;
     }
     int pixelIndex = yValue * screenWidth + xValue;
-    this->pBufferCurrent[pixelIndex] = value;
+    this->pMainBuffer[pixelIndex] = value;
 }
 
-void Screen::reset() {
-    memset(this->pBufferCurrent, 0x00, this->getWidth() * this->getHeight() * sizeof(Uint32));
+void Screen::clear() {
+    memset(this->pMainBuffer, 0x00, this->getWidth() * this->getHeight() * sizeof(Uint32));
+}
+
+void Screen::boxBlur() {
+    Uint32 *pTempBuffer = pMainBuffer;
+    this-> pMainBuffer = pSecondaryBuffer;
+    this->pSecondaryBuffer = pTempBuffer;
+
+    int pixelIndex;
+    int currentX;
+    int currentY;
+    int redTotalValue;
+    int greenTotalValue;
+    int blueTotalValue;
+
+    for (int y = 0; y < this->screenHeight; y++) {
+        for(int x = 0; x < this->screenWidth; x++) {
+            redTotalValue = 0;
+            greenTotalValue = 0;
+            blueTotalValue = 0;
+            for (int row = -1; row <= 1; row ++) {
+                for (int col = -1; col <= 1; col++) {
+                    currentX = x + col;
+                    currentY = y + row;
+                    if (
+                            currentY >= 0
+                            && currentY < this->screenHeight
+                            && currentX >= 0
+                            && currentX < this->screenWidth
+                        ){
+                        pixelIndex = currentY * this->screenWidth + currentX;
+                        Uint32 color = pSecondaryBuffer[pixelIndex];
+                        Uint8 red = (Uint8)(color >> 24);
+                        Uint8 green = (Uint8)(color >> 16);
+                        Uint8 blue = (Uint8)(color >> 8);
+                        redTotalValue += red;
+                        greenTotalValue += green;
+                        blueTotalValue += blue;
+                    }
+                }
+            }
+            Uint8 red = (Uint8)(redTotalValue/9);
+            Uint8 green = (Uint8)(greenTotalValue/9);
+            Uint8 blue = (Uint8)(blueTotalValue/9);
+            this->setPixelColor(x, y, red, green, blue);
+        }
+    }
 }
 
