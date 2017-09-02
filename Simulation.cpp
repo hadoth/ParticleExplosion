@@ -30,9 +30,9 @@ int Simulation::run() {
 void Simulation::handleLogic() {
 
     int elapsed = SDL_GetTicks();
-    Uint8 red = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0005 + 2*M_PI/3)));
+    Uint8 red = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0006 + 2*M_PI/3)));
     Uint8 green = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0005 + M_PI)));
-    Uint8 blue = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0005)));
+    Uint8 blue = (Uint8)(128.0 * (1.0 + sin(elapsed * 0.0004)));
 
     const Particle * const pParticles = this->pSwarm->getParticles();
 
@@ -43,17 +43,10 @@ void Simulation::handleLogic() {
         Particle particle = pParticles[i];
 
         int x = (int)((particle.getX() + 1) * (this->pScreen->getWidth()/2));
-        int y = (int)((particle.getY() + 1) * (this->pScreen->getHeight()/2));
+        int y = (int)(particle.getY() * (this->pScreen->getWidth()/2) + this->pScreen->getHeight()/2);
 
         this->pScreen->setPixelColor(x, y, red, green, blue);
     }
-//    Uint32 *pBufferToDraw = this->draw(
-//            this->pScreen->getBuffer(),
-//            this->pScreen->getWidth(),
-//            this->pScreen->getHeight()
-//    );
-//
-//    this->pScreen->setBuffer(pBufferToDraw);
 }
 
 void Simulation::start() {

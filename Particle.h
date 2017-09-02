@@ -6,7 +6,9 @@ class Particle {
 private:
     double xValue;
     double yValue;
-    const double speed;
+    double rSpeed;
+    double phi;
+    double tSpeed;
 public:
     Particle();
     virtual ~Particle();
